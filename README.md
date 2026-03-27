@@ -1,6 +1,6 @@
 # Mecha-Pay Pricing Table
 
-A beautiful, responsive React component for displaying pricing plans with Web3 integration. **TypeScript supported!**
+A beautiful, responsive React component for displaying Mecha-Pay pricing plans. **TypeScript supported!**
 
 ## Installation
 
@@ -10,31 +10,22 @@ npm install mecha-pay
 
 ## Usage
 
-### JavaScript
+Simply provide three required props: `apiKey`, `planId`, and `userId`. That's it!
 
 ```jsx
 import React from 'react';
 import { PricingTable } from 'mecha-pay';
 
 const App = () => {
-  const plans = [
-    {
-      planId: "0xefdc...",
-      price: "5000000",
-      duration: "2592000",
-      metadata: {
-        name: "Pro Merchant",
-        description: "Premium subscription plan",
-        features: [
-          { title: "Analytics", description: "Full dashboard access" },
-          { title: "24/7 Support", description: "Priority customer service" },
-          { title: "API Access", description: "Full REST API integration" }
-        ]
-      }
-    }
-  ];
+  const userId = "user_12345"; // Get from your auth system
 
-  return <PricingTable plans={plans} />;
+  return (
+    <PricingTable 
+      apiKey="mp_live_your_api_key_here"
+      planId="0xefdc..."
+      userId={userId}
+    />
+  );
 };
 
 export default App;
@@ -44,35 +35,104 @@ export default App;
 
 ```tsx
 import React from 'react';
-import { PricingTable, Plan } from 'mecha-pay';
+import { PricingTable } from 'mecha-pay';
 
 const App: React.FC = () => {
-  const plans: Plan[] = [
-    {
-      planId: "0xefdc...",
-      price: "5000000",
-      duration: "2592000",
-      metadata: {
-        name: "Pro Merchant",
-        description: "Premium subscription plan",
-        features: [
-          { title: "Analytics", description: "Full dashboard access" },
-          { title: "24/7 Support", description: "Priority customer service" },
-          { title: "API Access", description: "Full REST API integration" }
-        ]
-      }
-    }
-  ];
+  const userId = "user_12345";
 
-  return <PricingTable plans={plans} />;
+  return (
+    <PricingTable 
+      apiKey="mp_live_your_api_key_here"
+      planId="0xefdc..."
+      userId={userId}
+    />
+  );
 };
 
 export default App;
 ```
 
+### With Error Handling
+
+```jsx
+<PricingTable 
+  apiKey="mp_live_your_api_key_here"
+  planId="0xefdc..."
+  userId={userId}
+  onError={(error) => {
+    console.error('Failed to load plan:', error);
+    // Handle error (e.g., show notification)
+  }}
+/>
+```
+
+### Next.js Example
+
+```jsx
+import { PricingTable } from 'mecha-pay';
+import { useUser } from '@/hooks/useAuth';
+
+export default function PricingPage() {
+  const { userId } = useUser();
+
+  return (
+    <PricingTable 
+      apiKey={process.env.NEXT_PUBLIC_MECHAPAY_API_KEY}
+      planId="0xefdc..."
+      userId={userId}
+    />
+  );
+}
+```
+
+### TypeScript
+
+```tsx
+import React from 'react';
+import { PricingTable } from 'mecha-pay';
+
+const App: React.FC = () => {
+  return (
+    <PricingTable 
+      apiKey="mp_live_your_api_key_here"
+      onError={(error) => console.error(error)}
+    />
+  );
+};
+```
+
+## How It Works
+
+1. **Provide 3 Required Props:**
+   - `apiKey` - Your Mecha-Pay API key
+   - `planId` - The plan ID to display
+   - `userId` - Current user's ID
+
+2. **Component Automatically:**
+   - Fetches plan details from `http://localhost:3000/api/v1/plans/{planId}`
+   - Displays pricing card with features
+   - Generates payment link: `http://localhost:3000/pay/{planId}?userId={userId}&successUrl={currentURL}`
+
+3. **User Clicks "Subscribe Now":**
+   - Redirected to: `http://localhost:3000/pay/0xefdc...?userId=user_12345&successUrl=https://yoursite.com`
+
 ## API
 
-### TypeScript Types
+### Required Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| apiKey | `string` | Your Mecha-Pay API key (e.g., `"mp_live_..."`) |
+| planId | `string` | The plan ID to fetch (e.g., `"0xefdc..."`) |
+| userId | `string` | User ID for payment link generation |
+
+### Optional Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| onError | `(error: Error) => void` | Error callback function |
+
+## TypeScript Types
 
 ```typescript
 interface Feature {
@@ -87,30 +147,43 @@ interface PlanMetadata {
 }
 
 interface Plan {
-  planId: string;        // Unique identifier (e.g., contract address)
-  price: string;         // Price in wei (as string)
-  duration: string;      // Duration in seconds (as string)
+  planId: string;
+  price: string;
+  duration: string;
   metadata: PlanMetadata;
-}
-
-interface PricingTableProps {
-  plans: Plan[];
+  // activeSubscribers is returned by API but not used by component
 }
 ```
 
-### Props
+## API Response Structure
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| plans | `Plan[]` | Yes | Array of plan objects |
+The component fetches from `http://localhost:3000/api/v1/plans/{planId}` with response:
+
+```json
+{
+  "planId": "0xefdc...",
+  "price": "5000000",
+  "duration": "2592000",
+  "metadata": {
+    "name": "Pro Merchant",
+    "description": "Premium subscription plan",
+    "features": [
+      { "title": "Analytics", "description": "Full dashboard access" }
+    ]
+  },
+  "activeSubscribers": [...] // Ignored by component
+}
+```
 
 ## Features
 
 - 🎨 Beautiful gradient design
 - 📱 Fully responsive
-- ⚡ Lightweight with no extra dependencies
-- 🔗 Web3-ready (supports contract addresses and wei values)
+- ⚡ **Zero configuration** - just 3 props!
+- 🔄 Automatic loading and error states
+- 🔗 Auto-generated payment links to `localhost:3000`
 - 💎 **TypeScript support** with full type definitions
+- ⚙️ **Next.js compatible**
 - ♿ Accessible
 - 🎯 Easy to customize
 
