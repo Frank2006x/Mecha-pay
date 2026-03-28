@@ -1,6 +1,6 @@
 {
   "name": "mecha-pay",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A beautiful, responsive React component library for Web3 subscription payments. Display pricing tables, manage subscriptions, and gate premium content.",
   "homepage": "https://github.com/Frank2006x/Mecha-pay#readme",
   "bugs": {
