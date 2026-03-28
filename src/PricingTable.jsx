@@ -65,7 +65,7 @@ const PricingTable = ({
 
   const formatPrice = (price) => {
     // Convert from wei to a more readable format (assuming 18 decimals)
-    const formatted = (parseInt(price) / 1e18).toFixed(2);
+    const formatted = (parseInt(price) / 1e6).toFixed(2);
     return `$${formatted}`;
   };
 
