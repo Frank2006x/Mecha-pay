@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getPlan } from './api';
 import './PricingTable.css';
 
-const BASE_URL = 'https://mecha-pay.vercel.app/';
+const BASE_URL = 'https://mecha-pay.vercel.app';
 
 // Default styling configuration
 const defaultStyleConfig = {

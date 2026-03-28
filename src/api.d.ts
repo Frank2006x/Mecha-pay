@@ -10,7 +10,7 @@ export interface ApiError {
  * Fetches a plan from the Mecha-Pay API
  * @param apiKey - Your Mecha-Pay API key (e.g., "mp_live_...")
  * @param planId - The plan ID to fetch (e.g., "0xefdc...")
- * @param baseURL - Optional base URL (defaults to https://mecha-pay.vercel.app/)
+ * @param baseURL - Optional base URL (defaults to https://mecha-pay.vercel.app)
  * @returns Promise resolving to the plan data
  */
 export declare function getPlan(
@@ -22,7 +22,7 @@ export declare function getPlan(
 /**
  * Fetches all plans from the Mecha-Pay API
  * @param apiKey - Your Mecha-Pay API key (e.g., "mp_live_...")
- * @param baseURL - Optional base URL (defaults to https://mecha-pay.vercel.app/)
+ * @param baseURL - Optional base URL (defaults to https://mecha-pay.vercel.app)
  * @returns Promise resolving to array of plans
  */
 export declare function getPlans(
