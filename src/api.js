@@ -12,7 +12,6 @@ export const getPlan = async (apiKey, planId, baseURL = 'https://mecha-pay.verce
     const response = await axios.get(`${baseURL}/api/v1/plans/${planId}`, {
       headers: {
         'x-api-key': apiKey,
-        'Content-Type': 'application/json'
       }
     });
     
@@ -42,7 +41,6 @@ export const getPlans = async (apiKey, baseURL = 'https://mecha-pay.vercel.app')
     const response = await axios.get(`${baseURL}/api/v1/plans`, {
       headers: {
         'x-api-key': apiKey,
-        'Content-Type': 'application/json'
       }
     });
     
@@ -68,7 +66,7 @@ export const getPlans = async (apiKey, baseURL = 'https://mecha-pay.vercel.app')
  */
 export const checkSubscriptionStatus = async (apiKey, planId, userId, baseURL = 'https://mecha-pay.vercel.app') => {
   try {
-    const response = await axios.get(`${baseURL}/v1/status`, {
+    const response = await axios.get(`${baseURL}/api/v1/status`, {
       params: {
         planId: planId,
         buyer: userId

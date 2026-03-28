@@ -17,16 +17,24 @@ A beautiful, responsive React component for displaying Mecha-Pay pricing plans w
 - 💎 **Full TypeScript support** with complete type definitions
 - ⚙️ **Framework agnostic** - works with Next.js, CRA, Vite, etc.
 - 🎯 **Flexible styling** with styleConfig prop (v2.0+)
+- 🔍 **Subscription checker** - check user subscription status (v2.1+)
 - ♿ Accessible and keyboard-friendly
 - 🔧 Easy to customize and extend
 
-## 🆕 What's New in v2.0.0
+## 🆕 What's New in v2.1.0
+
+- ✅ **Subscription Status Checker**: New `checkSubscriptionStatus` API function to verify user subscriptions
+- ✅ **Enhanced Developer Tools**: Programmatic subscription verification for gating content
+- ✅ **Real-time Status**: Check active subscriptions and remaining time
+- ✅ **Full TypeScript Support**: Complete type definitions for subscription status
+- ✅ **Backward Compatible**: All existing code works without changes
+
+### v2.0.0
 
 - ✅ **Flexible Styling System**: New `styleConfig` prop for customizing width, height, and styles
 - ✅ **Production Ready**: Updated base URL to `https://mecha-pay.vercel.app/`
 - ✅ **Enhanced TypeScript**: Added `StyleConfig` interface with full type safety
 - ✅ **Better Developer Experience**: Inline styles support with intelligent merging
-- ✅ **Backward Compatible**: All existing code works without changes
 
 ## 📦 Installation
 
@@ -316,6 +324,15 @@ interface Plan {
   metadata: PlanMetadata;
 }
 
+interface SubscriptionStatus {
+  active: boolean;          // Whether subscription is currently active
+  status: string;           // "active" | "expired" | "not_found"
+  buyer: string;            // User/buyer ID
+  planId: string;           // Plan ID that was checked
+  subscriber?: string;      // Subscriber address (if active)
+  remainingTime?: number;   // Seconds remaining (if active)
+}
+
 interface PricingTableProps {
   apiKey: string;
   planId: string;
@@ -426,6 +443,213 @@ import './my-custom-styles.css';
 
 ## 🛠️ Advanced Usage
 
+### Subscription Status Checking
+
+**New in v2.1.0** - Verify user subscriptions programmatically:
+
+#### Basic Subscription Check
+
+```jsx
+import { checkSubscriptionStatus } from 'mecha-pay';
+import { useEffect, useState } from 'react';
+
+const ProtectedContent = ({ userId }) => {
+  const [hasAccess, setHasAccess] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const verify = async () => {
+      try {
+        const status = await checkSubscriptionStatus(
+          'mp_live_xxx',
+          '0xefdc...',
+          userId
+        );
+        setHasAccess(status.active);
+      } catch (error) {
+        console.error('Verification failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    verify();
+  }, [userId]);
+
+  if (loading) return <div>Verifying subscription...</div>;
+  
+  return hasAccess ? (
+    <div>🎉 Welcome to premium content!</div>
+  ) : (
+    <div>⚠️ Subscription required</div>
+  );
+};
+```
+
+#### Display Remaining Time
+
+```jsx
+import { checkSubscriptionStatus } from 'mecha-pay';
+
+const SubscriptionInfo = ({ userId, planId }) => {
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    checkSubscriptionStatus('mp_live_xxx', planId, userId)
+      .then(setStatus)
+      .catch(console.error);
+  }, [userId, planId]);
+
+  if (!status || !status.active) {
+    return <div>No active subscription</div>;
+  }
+
+  const daysLeft = Math.floor(status.remainingTime / 86400);
+  const hoursLeft = Math.floor((status.remainingTime % 86400) / 3600);
+
+  return (
+    <div className="subscription-info">
+      <p>✅ Subscription Active</p>
+      <p>⏰ Time Remaining: {daysLeft} days, {hoursLeft} hours</p>
+      <p>📋 Plan ID: {status.planId}</p>
+    </div>
+  );
+};
+```
+
+#### Conditional Rendering with Pricing Table
+
+```jsx
+import { PricingTable, checkSubscriptionStatus } from 'mecha-pay';
+
+const PremiumFeature = ({ userId }) => {
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    checkSubscriptionStatus('mp_live_xxx', '0xefdc...', userId)
+      .then(status => {
+        setIsSubscribed(status.active);
+        setChecking(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setChecking(false);
+      });
+  }, [userId]);
+
+  if (checking) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      {isSubscribed ? (
+        <div className="premium-dashboard">
+          <h1>Premium Dashboard</h1>
+          <p>Access to exclusive features</p>
+          {/* Your premium content here */}
+        </div>
+      ) : (
+        <div className="upgrade-prompt">
+          <h1>Unlock Premium Features</h1>
+          <PricingTable
+            apiKey="mp_live_xxx"
+            planId="0xefdc..."
+            userId={userId}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+#### Multi-Plan Subscription Check
+
+```jsx
+import { checkSubscriptionStatus } from 'mecha-pay';
+
+const MultiPlanAccess = ({ userId }) => {
+  const [subscriptions, setSubscriptions] = useState({});
+  const plans = ['0x1abc...', '0x2def...', '0x3ghi...'];
+
+  useEffect(() => {
+    const checkAll = async () => {
+      const results = await Promise.all(
+        plans.map(planId =>
+          checkSubscriptionStatus('mp_live_xxx', planId, userId)
+            .then(status => ({ planId, active: status.active }))
+        )
+      );
+      
+      const subsMap = {};
+      results.forEach(result => {
+        subsMap[result.planId] = result.active;
+      });
+      setSubscriptions(subsMap);
+    };
+    
+    checkAll();
+  }, [userId]);
+
+  return (
+    <div>
+      <h2>Your Subscriptions</h2>
+      {plans.map(planId => (
+        <div key={planId}>
+          Plan {planId}: {subscriptions[planId] ? '✅ Active' : '❌ Inactive'}
+        </div>
+      ))}
+    </div>
+  );
+};
+```
+
+#### TypeScript Usage
+
+```tsx
+import { checkSubscriptionStatus, SubscriptionStatus } from 'mecha-pay';
+import { useEffect, useState } from 'react';
+
+const SubscriptionGuard: React.FC<{ userId: string; children: React.ReactNode }> = ({ 
+  userId, 
+  children 
+}) => {
+  const [status, setStatus] = useState<SubscriptionStatus | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const verify = async (): Promise<void> => {
+      try {
+        const result = await checkSubscriptionStatus(
+          process.env.REACT_APP_MECHAPAY_API_KEY!,
+          process.env.REACT_APP_PLAN_ID!,
+          userId
+        );
+        setStatus(result);
+      } catch (error) {
+        console.error('Subscription check failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verify();
+  }, [userId]);
+
+  if (loading) {
+    return <div>Checking access...</div>;
+  }
+
+  if (!status?.active) {
+    return <div>Access denied. Please subscribe.</div>;
+  }
+
+  return <>{children}</>;
+};
+```
+
 ### Multiple Pricing Cards
 
 Display multiple plans side-by-side:
@@ -520,6 +744,65 @@ const PricingPage = () => {
 
 The package also exports API functions for direct use:
 
+### `checkSubscriptionStatus(apiKey, planId, userId, baseURL?)`
+
+**New in v2.1.0** - Check if a user has an active subscription to a plan:
+
+```javascript
+import { checkSubscriptionStatus } from 'mecha-pay';
+
+const status = await checkSubscriptionStatus(
+  'mp_live_xxx',
+  '0xefdc...',
+  'user_12345',
+  'https://mecha-pay.vercel.app/'  // Optional, uses default
+);
+
+console.log(status.active);         // true/false
+console.log(status.status);         // "active" | "expired" | "not_found"
+console.log(status.remainingTime);  // seconds remaining (if active)
+```
+
+**Response Structure:**
+
+```typescript
+interface SubscriptionStatus {
+  active: boolean;          // Whether subscription is currently active
+  status: string;           // "active" | "expired" | "not_found"
+  buyer: string;            // User/buyer ID
+  planId: string;           // Plan ID that was checked
+  subscriber?: string;      // Subscriber address (if active)
+  remainingTime?: number;   // Seconds remaining (if active)
+}
+```
+
+**Use Cases:**
+
+```javascript
+// 1. Gate premium content
+const status = await checkSubscriptionStatus('mp_live_xxx', '0xefdc...', userId);
+if (status.active) {
+  // Show premium content
+} else {
+  // Show pricing table or upgrade message
+}
+
+// 2. Display subscription info
+if (status.active && status.remainingTime) {
+  const daysLeft = Math.floor(status.remainingTime / 86400);
+  console.log(`Subscription active for ${daysLeft} more days`);
+}
+
+// 3. Conditional rendering in React
+const [isSubscribed, setIsSubscribed] = useState(false);
+
+useEffect(() => {
+  checkSubscriptionStatus('mp_live_xxx', planId, userId)
+    .then(result => setIsSubscribed(result.active))
+    .catch(err => console.error(err));
+}, []);
+```
+
 ### `getPlan(apiKey, planId, baseURL?)`
 
 Fetch a single plan:
@@ -568,6 +851,42 @@ plans.forEach(plan => {
 2. If using `styleConfig`, ensure you're passing a valid object
 3. Check that React.CSSProperties types are correct (TypeScript)
 
+### Subscription status check failing
+
+```jsx
+// Handle errors gracefully
+try {
+  const status = await checkSubscriptionStatus(apiKey, planId, userId);
+  console.log('Status:', status);
+} catch (error) {
+  console.error('Check failed:', error.message);
+  // Common errors:
+  // - 401: Invalid API key
+  // - 404: Plan or user not found
+  // - Network error: Check internet connection
+  // - CORS error: Ensure API endpoint allows your domain
+}
+```
+
+**Common subscription check issues:**
+
+1. **Returns `{ active: false, status: "not_found" }`**
+   - User has never subscribed to this plan
+   - Check that planId and userId are correct
+
+2. **Returns `{ active: false, status: "expired" }`**
+   - Subscription existed but has expired
+   - User needs to renew subscription
+
+3. **401 Unauthorized**
+   - API key is invalid or missing
+   - Verify your API key starts with `mp_live_` or `mp_test_`
+
+4. **Network errors**
+   - Check internet connection
+   - Verify API endpoint is accessible
+   - Check for CORS issues in browser console
+
 ### API errors
 
 ```jsx
@@ -601,7 +920,15 @@ ISC License - see the [LICENSE](LICENSE) file for details.
 
 ## 📝 Changelog
 
-### v2.0.0 (Latest)
+### v2.1.0 (Latest)
+- ✅ Added `checkSubscriptionStatus` API function for subscription verification
+- ✅ Full TypeScript support for `SubscriptionStatus` interface
+- ✅ Enable content gating based on active subscriptions
+- ✅ Real-time subscription status with remaining time
+- ✅ Comprehensive examples for subscription checking
+- ✅ Enhanced error handling for subscription checks
+
+### v2.0.0
 - ✅ Added flexible `styleConfig` prop for custom styling
 - ✅ Updated base URL to production (`https://mecha-pay.vercel.app/`)
 - ✅ Enhanced TypeScript definitions with `StyleConfig` interface

@@ -41,15 +41,20 @@ const PricingTable = ({
         setLoading(true);
         setError(null);
         
-        // Fetch plan data and subscription status in parallel
-        const [planData, statusData] = await Promise.all([
-          getPlan(apiKey, planId, BASE_URL),
-          checkSubscriptionStatus(apiKey, planId, userId, BASE_URL)
-        ]);
-        
+        // Fetch plan data (required)
+        const planData = await getPlan(apiKey, planId, BASE_URL);
         setPlan(planData);
-        setSubscriptionStatus(statusData);
         setLoading(false);
+        
+        // Fetch subscription status (optional - don't fail if this errors)
+        try {
+          const statusData = await checkSubscriptionStatus(apiKey, planId, userId, BASE_URL);
+          setSubscriptionStatus(statusData);
+        } catch (statusErr) {
+          console.warn('Failed to check subscription status:', statusErr);
+          // Set a default "not subscribed" state on error
+          setSubscriptionStatus({ active: false, status: 'unknown', buyer: userId, planId });
+        }
         setCheckingSubscription(false);
       } catch (err) {
         setError(err.message);
