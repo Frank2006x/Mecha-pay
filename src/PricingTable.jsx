@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getPlan } from './api';
 import './PricingTable.css';
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'https://mecha-pay.vercel.app/';
 
 const PricingTable = ({ apiKey, planId, userId, onError }) => {
   const [plan, setPlan] = useState(null);

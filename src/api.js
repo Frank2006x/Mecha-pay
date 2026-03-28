@@ -4,10 +4,10 @@ import axios from 'axios';
  * Fetches a plan from the Mecha-Pay API
  * @param {string} apiKey - Your Mecha-Pay API key (e.g., "mp_live_...")
  * @param {string} planId - The plan ID to fetch (e.g., "0xefdc...")
- * @param {string} baseURL - Optional base URL (defaults to http://localhost:3000)
+ * @param {string} baseURL - Optional base URL (defaults to https://mecha-pay.vercel.app/)
  * @returns {Promise<Object>} The plan data
  */
-export const getPlan = async (apiKey, planId, baseURL = 'http://localhost:3000') => {
+export const getPlan = async (apiKey, planId, baseURL = 'https://mecha-pay.vercel.app/') => {
   try {
     const response = await axios.get(`${baseURL}/api/v1/plans/${planId}`, {
       headers: {
@@ -34,10 +34,10 @@ export const getPlan = async (apiKey, planId, baseURL = 'http://localhost:3000')
 /**
  * Fetches all plans from the Mecha-Pay API
  * @param {string} apiKey - Your Mecha-Pay API key (e.g., "mp_live_...")
- * @param {string} baseURL - Optional base URL (defaults to http://localhost:3000)
+ * @param {string} baseURL - Optional base URL (defaults to https://mecha-pay.vercel.app/)
  * @returns {Promise<Array>} Array of plans
  */
-export const getPlans = async (apiKey, baseURL = 'http://localhost:3000') => {
+export const getPlans = async (apiKey, baseURL = 'https://mecha-pay.vercel.app/') => {
   try {
     const response = await axios.get(`${baseURL}/api/v1/plans`, {
       headers: {
