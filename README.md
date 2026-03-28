@@ -1,11 +1,34 @@
-# Mecha-Pay Pricing Table
+# 🚀 Mecha-Pay React SDK
 
 [![npm version](https://img.shields.io/npm/v/mecha-pay.svg)](https://www.npmjs.com/package/mecha-pay)
 [![npm downloads](https://img.shields.io/npm/dm/mecha-pay.svg)](https://www.npmjs.com/package/mecha-pay)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](https://opensource.org/licenses/ISC)
 
-A beautiful, responsive React component for displaying Mecha-Pay pricing plans with full TypeScript support and flexible styling options.
+A beautiful, responsive React component library for Web3 subscription payments. Display stunning pricing tables, manage subscriptions, and gate premium content with just a few lines of code.
+
+## 🌟 Why Mecha-Pay?
+
+- **⚡ 3-Minute Integration**: Get started with just 3 props - no complex setup
+- **🎨 Production-Ready UI**: Beautiful designs out-of-the-box, fully customizable
+- **🔐 Secure Payments**: Built-in Web3 payment processing - no payment logic needed
+- **📊 Subscription Management**: Built-in subscription status checking and verification
+- **🛡️ TypeScript First**: Full type safety and IntelliSense support
+- **🚀 Framework Agnostic**: Works with Next.js, CRA, Vite, Remix, and more
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [What's New](#-whats-new-in-v211)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Usage Examples](#-usage-examples)
+- [Custom Styling](#-custom-styling-v20)
+- [Subscription Status Checking](#-subscription-status-checking)
+- [API Reference](#-api-reference)
+- [API Functions](#-api-functions)
+- [Troubleshooting](#-troubleshooting)
+- [Changelog](#-changelog)
 
 ## ✨ Features
 
@@ -21,20 +44,66 @@ A beautiful, responsive React component for displaying Mecha-Pay pricing plans w
 - ♿ Accessible and keyboard-friendly
 - 🔧 Easy to customize and extend
 
-## 🆕 What's New in v2.1.0
+## 🆕 What's New in v2.1.1
 
-- ✅ **Subscription Status Checker**: New `checkSubscriptionStatus` API function to verify user subscriptions
-- ✅ **Enhanced Developer Tools**: Programmatic subscription verification for gating content
+- 🐛 **Bug Fixes**: Fixed API endpoint URL in `checkSubscriptionStatus` function
+- 🛡️ **Enhanced Error Handling**: Graceful degradation when subscription check fails
+- 🎯 **Improved Resilience**: Pricing table now displays even if subscription verification has temporary issues
+- ✅ **Better User Experience**: Component remains functional during API downtimes
+
+### Previous Releases
+
+<details>
+<summary>v2.1.0 - Subscription Status Checker</summary>
+
+- ✅ **Subscription Status Checker**: New `checkSubscriptionStatus` API function
+- ✅ **Content Gating**: Programmatic subscription verification
 - ✅ **Real-time Status**: Check active subscriptions and remaining time
-- ✅ **Full TypeScript Support**: Complete type definitions for subscription status
+- ✅ **Full TypeScript Support**: Complete type definitions
 - ✅ **Backward Compatible**: All existing code works without changes
+</details>
 
-### v2.0.0
+<details>
+<summary>v2.0.0 - Flexible Styling System</summary>
 
-- ✅ **Flexible Styling System**: New `styleConfig` prop for customizing width, height, and styles
-- ✅ **Production Ready**: Updated base URL to `https://mecha-pay.vercel.app/`
+- ✅ **Flexible Styling System**: New `styleConfig` prop for customization
+- ✅ **Production Ready**: Updated base URL to production environment
 - ✅ **Enhanced TypeScript**: Added `StyleConfig` interface with full type safety
-- ✅ **Better Developer Experience**: Inline styles support with intelligent merging
+- ✅ **Better Developer Experience**: Inline styles with intelligent merging
+</details>
+
+## 🔄 Migration Guide
+
+### Upgrading from v2.1.0 to v2.1.1
+
+**No breaking changes!** This is a bug fix release. Simply update your package:
+
+```bash
+npm update mecha-pay
+```
+
+**What changed:**
+- Fixed API endpoint in `checkSubscriptionStatus` (now correctly calls `/api/v1/status`)
+- Improved error handling in `PricingTable` component
+- Component now gracefully handles subscription verification failures
+
+**Action required:** None - all existing code works without modifications.
+
+### Upgrading from v2.0.x to v2.1.x
+
+**No breaking changes!** The new `checkSubscriptionStatus` function is additive. Update with:
+
+```bash
+npm update mecha-pay
+```
+
+**New features available:**
+```javascript
+import { checkSubscriptionStatus } from 'mecha-pay';
+
+const status = await checkSubscriptionStatus(apiKey, planId, userId);
+console.log(status.active); // true/false
+```
 
 ## 📦 Installation
 
@@ -89,6 +158,23 @@ const App: React.FC = () => {
 
 export default App;
 ```
+
+## 🎯 Common Use Cases
+
+### 1. Simple Pricing Page
+Display a single pricing plan - perfect for SaaS products with one tier.
+
+### 2. Multiple Tier Pricing
+Show multiple plans side-by-side for comparison (Basic, Pro, Enterprise).
+
+### 3. Gated Content
+Check subscription status to lock/unlock premium features in your app.
+
+### 4. Subscription Dashboard
+Display active subscriptions with remaining time and renewal options.
+
+### 5. Upgrade Prompts
+Show pricing tables to non-subscribers when they try to access premium features.
 
 ## 📚 Usage Examples
 
@@ -370,6 +456,32 @@ The component fetches from `https://mecha-pay.vercel.app/api/v1/plans/{planId}` 
     ]
   },
   "activeSubscribers": []  // Optional, not used by component
+}
+```
+
+### Subscription Status Response
+
+The `checkSubscriptionStatus` function calls `https://mecha-pay.vercel.app/api/v1/status` and returns:
+
+**Active Subscription:**
+```json
+{
+  "active": true,
+  "status": "ACTIVE",
+  "buyer": "user_id_001",
+  "planId": "0x2d5f...",
+  "subscriber": "0xb292...",
+  "remainingTime": 2585477
+}
+```
+
+**Inactive/Expired Subscription:**
+```json
+{
+  "active": false,
+  "status": "not purchased",
+  "buyer": "user_id_999",
+  "planId": "0x2d5f..."
 }
 ```
 
@@ -768,13 +880,18 @@ console.log(status.remainingTime);  // seconds remaining (if active)
 ```typescript
 interface SubscriptionStatus {
   active: boolean;          // Whether subscription is currently active
-  status: string;           // "active" | "expired" | "not_found"
+  status: string;           // "ACTIVE" | "not purchased" | "expired"
   buyer: string;            // User/buyer ID
   planId: string;           // Plan ID that was checked
-  subscriber?: string;      // Subscriber address (if active)
-  remainingTime?: number;   // Seconds remaining (if active)
+  subscriber?: string;      // Subscriber wallet address (only if active)
+  remainingTime?: number;   // Seconds remaining (only if active)
 }
 ```
+
+**Important Notes:**
+- The `subscriber` field (wallet address) is only present when `active: true`
+- The `remainingTime` field is only present when `active: true`
+- Status values: `"ACTIVE"` when subscribed, `"not purchased"` when never subscribed, `"expired"` when subscription ended
 
 **Use Cases:**
 
@@ -870,9 +987,10 @@ try {
 
 **Common subscription check issues:**
 
-1. **Returns `{ active: false, status: "not_found" }`**
+1. **Returns `{ active: false, status: "not purchased" }`**
    - User has never subscribed to this plan
    - Check that planId and userId are correct
+   - This is the expected response for non-subscribers
 
 2. **Returns `{ active: false, status: "expired" }`**
    - Subscription existed but has expired
@@ -881,11 +999,17 @@ try {
 3. **401 Unauthorized**
    - API key is invalid or missing
    - Verify your API key starts with `mp_live_` or `mp_test_`
+   - Check API key permissions in your Mecha-Pay dashboard
 
-4. **Network errors**
+4. **404 Not Found**
+   - Plan ID doesn't exist
+   - Verify the planId is correct and the plan exists in your account
+
+5. **Network errors**
    - Check internet connection
-   - Verify API endpoint is accessible
+   - Verify API endpoint `https://mecha-pay.vercel.app` is accessible
    - Check for CORS issues in browser console
+   - Component gracefully handles these errors by defaulting to non-subscribed state
 
 ### API errors
 
@@ -904,9 +1028,64 @@ try {
 />
 ```
 
+## ❓ Frequently Asked Questions (FAQ)
+
+### Q: Do I need to handle payment processing myself?
+**A:** No! Mecha-Pay handles all payment processing. The component generates a payment link that redirects users to the secure Mecha-Pay checkout page.
+
+### Q: What happens after a user pays?
+**A:** Users are redirected back to your `successUrl` (defaults to current page). The subscription becomes active immediately and can be verified using `checkSubscriptionStatus`.
+
+### Q: Can I customize the pricing table design?
+**A:** Yes! Use the `styleConfig` prop to customize colors, sizes, and styles, or override CSS classes for complete control.
+
+### Q: Does this work with Next.js App Router?
+**A:** Yes! Just add `'use client'` at the top of your component. See the [Next.js examples](#nextjs-app-router) above.
+
+### Q: How do I get my API key?
+**A:** Sign up at [Mecha-Pay](https://mecha-pay.vercel.app), create an account, and generate your API key from the dashboard.
+
+### Q: Can I test without real payments?
+**A:** Yes! Use test API keys (starting with `mp_test_`) for development and testing.
+
+### Q: Is TypeScript supported?
+**A:** Fully! The package includes complete TypeScript definitions for all components and functions.
+
+### Q: How do I gate content behind a subscription?
+**A:** Use the `checkSubscriptionStatus` function to verify active subscriptions before rendering premium content. See [Subscription Status Checking](#-subscription-status-checking) examples.
+
+### Q: What if the subscription check API fails?
+**A:** The component gracefully handles failures. The pricing table will still display with a "Subscribe Now" button, defaulting to a non-subscribed state.
+
+### Q: Can I display multiple plans on one page?
+**A:** Yes! Render multiple `<PricingTable>` components with different `planId` props. See [Multiple Pricing Cards](#multiple-pricing-cards) example.
+
+### Q: How are prices formatted?
+**A:** Prices in wei are automatically converted to USD (assuming 18 decimals). Example: `5000000000000000000` wei = `$5.00`.
+
+### Q: Can I use this in a React Native app?
+**A:** No, this package is designed for web applications only. It uses web-specific APIs and browser navigation.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+### How to Contribute
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 💬 Support
+
+Need help? Here's how to get support:
+
+- **📖 Documentation**: Read through this README and the examples
+- **🐛 Bug Reports**: [Open an issue](https://github.com/Frank2006x/Mecha-pay/issues) on GitHub
+- **💡 Feature Requests**: [Open an issue](https://github.com/Frank2006x/Mecha-pay/issues) with the "enhancement" label
+- **📧 Email**: Contact the Mecha-Pay team for enterprise support
 
 ## 📄 License
 
@@ -914,13 +1093,21 @@ ISC License - see the [LICENSE](LICENSE) file for details.
 
 ## 🔗 Links
 
-- [npm Package](https://www.npmjs.com/package/mecha-pay)
-- [GitHub Repository](https://github.com/Frank2006x/Mecha-pay)
-- [Report Issues](https://github.com/Frank2006x/Mecha-pay/issues)
+- 📦 [npm Package](https://www.npmjs.com/package/mecha-pay)
+- 💻 [GitHub Repository](https://github.com/Frank2006x/Mecha-pay)
+- 🐛 [Report Issues](https://github.com/Frank2006x/Mecha-pay/issues)
+- 🌐 [Mecha-Pay Platform](https://mecha-pay.vercel.app)
+- 📚 [API Documentation](https://mecha-pay.vercel.app/api/docs)
 
 ## 📝 Changelog
 
-### v2.1.0 (Latest)
+### v2.1.1 (Latest - Bug Fix Release)
+- 🐛 **Critical Fix**: Corrected API endpoint URL in `checkSubscriptionStatus` from `/v1/status` to `/api/v1/status`
+- 🛡️ **Improved Error Handling**: Separated plan fetching from subscription checking for better resilience
+- ✅ **Graceful Degradation**: Component now displays pricing even if subscription verification fails
+- 📝 **Enhanced Documentation**: Added response examples and better troubleshooting guide
+
+### v2.1.0
 - ✅ Added `checkSubscriptionStatus` API function for subscription verification
 - ✅ Full TypeScript support for `SubscriptionStatus` interface
 - ✅ Enable content gating based on active subscriptions
@@ -943,4 +1130,10 @@ ISC License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
+<div align="center">
+
 Made with ❤️ by the Mecha-Pay team
+
+**[⬆ Back to Top](#-mecha-pay-react-sdk)**
+
+</div>
