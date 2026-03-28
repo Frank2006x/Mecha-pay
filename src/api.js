@@ -58,4 +58,37 @@ export const getPlans = async (apiKey, baseURL = 'https://mecha-pay.vercel.app')
   }
 };
 
+/**
+ * Checks if a user is subscribed to a plan
+ * @param {string} apiKey - Your Mecha-Pay API key (e.g., "mp_live_...")
+ * @param {string} planId - The plan ID to check (e.g., "0xefdc...")
+ * @param {string} userId - The user/buyer ID to check
+ * @param {string} baseURL - Optional base URL (defaults to https://mecha-pay.vercel.app)
+ * @returns {Promise<Object>} Subscription status data with { active, status, buyer, planId, subscriber?, remainingTime? }
+ */
+export const checkSubscriptionStatus = async (apiKey, planId, userId, baseURL = 'https://mecha-pay.vercel.app') => {
+  try {
+    const response = await axios.get(`${baseURL}/v1/status`, {
+      params: {
+        planId: planId,
+        buyer: userId
+      },
+      headers: {
+        'x-api-key': apiKey,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      throw new Error(`API Error: ${error.response.status} - ${error.response.data.message || error.response.statusText}`);
+    } else if (error.request) {
+      throw new Error('Network Error: No response from server');
+    } else {
+      throw new Error(`Request Error: ${error.message}`);
+    }
+  }
+};
+
 export default getPlan;

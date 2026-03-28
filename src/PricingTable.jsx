@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getPlan } from './api';
+import { getPlan, checkSubscriptionStatus } from './api';
 import './PricingTable.css';
 
 const BASE_URL = 'https://mecha-pay.vercel.app';
@@ -23,6 +23,8 @@ const PricingTable = ({
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [checkingSubscription, setCheckingSubscription] = useState(true);
 
   // Merge user-provided style config with defaults
   const mergedConfig = {
@@ -34,25 +36,33 @@ const PricingTable = ({
   };
 
   useEffect(() => {
-    const fetchPlanData = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        const data = await getPlan(apiKey, planId, BASE_URL);
-        setPlan(data);
+        // Fetch plan data and subscription status in parallel
+        const [planData, statusData] = await Promise.all([
+          getPlan(apiKey, planId, BASE_URL),
+          checkSubscriptionStatus(apiKey, planId, userId, BASE_URL)
+        ]);
+        
+        setPlan(planData);
+        setSubscriptionStatus(statusData);
         setLoading(false);
+        setCheckingSubscription(false);
       } catch (err) {
         setError(err.message);
         setLoading(false);
+        setCheckingSubscription(false);
         if (onError) {
           onError(err);
         }
       }
     };
 
-    fetchPlanData();
-  }, [apiKey, planId, onError]);
+    fetchData();
+  }, [apiKey, planId, userId, onError]);
 
   const generatePaymentLink = () => {
     const currentURL = typeof window !== 'undefined' ? window.location.origin : '';
@@ -65,7 +75,7 @@ const PricingTable = ({
 
   const formatPrice = (price) => {
     // Convert from wei to a more readable format (assuming 18 decimals)
-    const formatted = (parseInt(price) / 1e6).toFixed(2);
+    const formatted = (parseInt(price) / 1e18).toFixed(2);
     return `$${formatted}`;
   };
 
@@ -76,6 +86,19 @@ const PricingTable = ({
       return `${months} ${months === 1 ? 'month' : 'months'}`;
     }
     return `${days} ${days === 1 ? 'day' : 'days'}`;
+  };
+
+  const formatRemainingTime = (seconds) => {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    
+    if (days > 0) {
+      return `${days} ${days === 1 ? 'day' : 'days'}`;
+    } else if (hours > 0) {
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+    } else {
+      return 'Less than an hour';
+    }
   };
 
   if (loading) {
@@ -154,13 +177,31 @@ const PricingTable = ({
           </ul>
         </div>
 
-        <a 
-          href={generatePaymentLink()} 
-          className="pricing-button"
-          style={mergedConfig.buttonStyle}
-        >
-          Subscribe Now
-        </a>
+        {subscriptionStatus && subscriptionStatus.active ? (
+          <div 
+            className="pricing-button pricing-button-active"
+            style={{
+              ...mergedConfig.buttonStyle,
+              cursor: 'default',
+              opacity: 0.8
+            }}
+          >
+            ✓ Active Subscription
+            {subscriptionStatus.remainingTime && (
+              <span style={{ display: 'block', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                {formatRemainingTime(subscriptionStatus.remainingTime)} remaining
+              </span>
+            )}
+          </div>
+        ) : (
+          <a 
+            href={generatePaymentLink()} 
+            className="pricing-button"
+            style={mergedConfig.buttonStyle}
+          >
+            Subscribe Now
+          </a>
+        )}
       </div>
     </div>
   );

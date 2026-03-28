@@ -6,6 +6,15 @@ export interface ApiError {
   status?: number;
 }
 
+export interface SubscriptionStatus {
+  active: boolean;
+  status: string;
+  buyer: string;
+  planId: string;
+  subscriber?: string;
+  remainingTime?: number;
+}
+
 /**
  * Fetches a plan from the Mecha-Pay API
  * @param apiKey - Your Mecha-Pay API key (e.g., "mp_live_...")
@@ -29,5 +38,20 @@ export declare function getPlans(
   apiKey: string,
   baseURL?: string
 ): Promise<Plan[]>;
+
+/**
+ * Checks if a user is subscribed to a plan
+ * @param apiKey - Your Mecha-Pay API key (e.g., "mp_live_...")
+ * @param planId - The plan ID to check (e.g., "0xefdc...")
+ * @param userId - The user/buyer ID to check
+ * @param baseURL - Optional base URL (defaults to https://mecha-pay.vercel.app)
+ * @returns Promise resolving to subscription status
+ */
+export declare function checkSubscriptionStatus(
+  apiKey: string,
+  planId: string,
+  userId: string,
+  baseURL?: string
+): Promise<SubscriptionStatus>;
 
 export default getPlan;

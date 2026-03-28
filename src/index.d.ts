@@ -48,5 +48,15 @@ export const PricingTable: FC<PricingTableProps>;
 export default PricingTable;
 
 // API Functions
+export interface SubscriptionStatus {
+  active: boolean;
+  status: string;
+  buyer: string;
+  planId: string;
+  subscriber?: string;
+  remainingTime?: number;
+}
+
 export function getPlan(apiKey: string, planId: string, baseURL?: string): Promise<Plan>;
 export function getPlans(apiKey: string, baseURL?: string): Promise<Plan[]>;
+export function checkSubscriptionStatus(apiKey: string, planId: string, userId: string, baseURL?: string): Promise<SubscriptionStatus>;

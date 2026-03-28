@@ -161,6 +161,17 @@
   background: white;
 }
 
+.pricing-button-active {
+  background: #4CAF50 !important;
+  color: white !important;
+  pointer-events: none;
+}
+
+.pricing-button-active:hover {
+  transform: none;
+  background: #4CAF50 !important;
+}
+
 /* Loading, Error, and Empty States */
 .pricing-loading,
 .pricing-error,
