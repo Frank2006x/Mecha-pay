@@ -18,6 +18,19 @@ export interface Plan {
   metadata: PlanMetadata;
 }
 
+export interface StyleConfig {
+  /** Width of the pricing card (default: '350px') */
+  width?: string;
+  /** Height of the pricing card (default: 'auto') */
+  height?: string;
+  /** Custom styles for the container div */
+  containerStyle?: React.CSSProperties;
+  /** Custom styles for the card div */
+  cardStyle?: React.CSSProperties;
+  /** Custom styles for the subscribe button */
+  buttonStyle?: React.CSSProperties;
+}
+
 export interface PricingTableProps {
   /** Your Mecha-Pay API key (required) */
   apiKey: string;
@@ -27,6 +40,8 @@ export interface PricingTableProps {
   userId: string;
   /** Optional error callback function */
   onError?: (error: Error) => void;
+  /** Optional style configuration object */
+  styleConfig?: StyleConfig;
 }
 
 export const PricingTable: FC<PricingTableProps>;

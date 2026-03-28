@@ -4,10 +4,34 @@ import './PricingTable.css';
 
 const BASE_URL = 'https://mecha-pay.vercel.app/';
 
-const PricingTable = ({ apiKey, planId, userId, onError }) => {
+// Default styling configuration
+const defaultStyleConfig = {
+  width: '350px',
+  height: 'auto',
+  containerStyle: {},
+  cardStyle: {},
+  buttonStyle: {}
+};
+
+const PricingTable = ({ 
+  apiKey, 
+  planId, 
+  userId, 
+  onError,
+  styleConfig = defaultStyleConfig 
+}) => {
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Merge user-provided style config with defaults
+  const mergedConfig = {
+    ...defaultStyleConfig,
+    ...styleConfig,
+    containerStyle: { ...defaultStyleConfig.containerStyle, ...styleConfig.containerStyle },
+    cardStyle: { ...defaultStyleConfig.cardStyle, ...styleConfig.cardStyle },
+    buttonStyle: { ...defaultStyleConfig.buttonStyle, ...styleConfig.buttonStyle }
+  };
 
   useEffect(() => {
     const fetchPlanData = async () => {
@@ -56,7 +80,7 @@ const PricingTable = ({ apiKey, planId, userId, onError }) => {
 
   if (loading) {
     return (
-      <div className="pricing-table-container">
+      <div className="pricing-table-container" style={mergedConfig.containerStyle}>
         <div className="pricing-loading">Loading plan...</div>
       </div>
     );
@@ -64,7 +88,7 @@ const PricingTable = ({ apiKey, planId, userId, onError }) => {
 
   if (error) {
     return (
-      <div className="pricing-table-container">
+      <div className="pricing-table-container" style={mergedConfig.containerStyle}>
         <div className="pricing-error">
           <span className="error-icon">⚠️</span>
           <p className="error-message">{error}</p>
@@ -75,15 +99,22 @@ const PricingTable = ({ apiKey, planId, userId, onError }) => {
 
   if (!plan) {
     return (
-      <div className="pricing-table-container">
+      <div className="pricing-table-container" style={mergedConfig.containerStyle}>
         <div className="pricing-empty">No plan found</div>
       </div>
     );
   }
 
   return (
-    <div className="pricing-table-container">
-      <div className="pricing-card">
+    <div className="pricing-table-container" style={mergedConfig.containerStyle}>
+      <div 
+        className="pricing-card" 
+        style={{
+          width: mergedConfig.width,
+          height: mergedConfig.height,
+          ...mergedConfig.cardStyle
+        }}
+      >
         <div className="pricing-header">
           <h2 className="pricing-title">{plan.metadata.name}</h2>
           <p className="pricing-description">{plan.metadata.description}</p>
@@ -126,6 +157,7 @@ const PricingTable = ({ apiKey, planId, userId, onError }) => {
         <a 
           href={generatePaymentLink()} 
           className="pricing-button"
+          style={mergedConfig.buttonStyle}
         >
           Subscribe Now
         </a>

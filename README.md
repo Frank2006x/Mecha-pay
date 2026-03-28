@@ -131,6 +131,19 @@ const App: React.FC = () => {
 | Prop | Type | Description |
 |------|------|-------------|
 | onError | `(error: Error) => void` | Error callback function |
+| styleConfig | `StyleConfig` | Custom styling configuration object |
+
+### StyleConfig Interface
+
+```typescript
+interface StyleConfig {
+  width?: string;           // Card width (default: '350px')
+  height?: string;          // Card height (default: 'auto')
+  containerStyle?: React.CSSProperties;  // Custom container styles
+  cardStyle?: React.CSSProperties;       // Custom card styles
+  buttonStyle?: React.CSSProperties;     // Custom button styles
+}
+```
 
 ## TypeScript Types
 
@@ -181,15 +194,94 @@ The component fetches from `http://localhost:3000/api/v1/plans/{planId}` with re
 - 📱 Fully responsive
 - ⚡ **Zero configuration** - just 3 props!
 - 🔄 Automatic loading and error states
-- 🔗 Auto-generated payment links to `localhost:3000`
+- 🔗 Auto-generated payment links
 - 💎 **TypeScript support** with full type definitions
 - ⚙️ **Next.js compatible**
+- 🎯 **Flexible styling** with styleConfig prop
 - ♿ Accessible
-- 🎯 Easy to customize
+- 🔧 Easy to customize
 
 ## Customization
 
-The component uses CSS modules that can be overridden. Import your custom styles after the component:
+### Using styleConfig Prop
+
+The component now supports flexible styling through the `styleConfig` prop:
+
+```jsx
+import { PricingTable } from 'mecha-pay';
+
+const App = () => {
+  const styleConfig = {
+    width: '400px',
+    height: 'auto',
+    containerStyle: {
+      padding: '3rem',
+      backgroundColor: '#f9f9f9'
+    },
+    cardStyle: {
+      background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      borderRadius: '20px',
+      boxShadow: '0 15px 35px rgba(0, 0, 0, 0.3)'
+    },
+    buttonStyle: {
+      background: '#4CAF50',
+      color: 'white',
+      borderRadius: '25px',
+      padding: '1.2rem',
+      fontSize: '1.2rem'
+    }
+  };
+
+  return (
+    <PricingTable 
+      apiKey="mp_live_your_api_key_here"
+      planId="0xefdc..."
+      userId="user123"
+      styleConfig={styleConfig}
+    />
+  );
+};
+```
+
+### Quick Styling Examples
+
+**Custom Size:**
+```jsx
+<PricingTable 
+  styleConfig={{ width: '400px', height: '600px' }}
+  {...otherProps}
+/>
+```
+
+**Custom Card Color:**
+```jsx
+<PricingTable 
+  styleConfig={{
+    cardStyle: {
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    }
+  }}
+  {...otherProps}
+/>
+```
+
+**Custom Button:**
+```jsx
+<PricingTable 
+  styleConfig={{
+    buttonStyle: {
+      background: '#ff6b6b',
+      borderRadius: '30px',
+      fontSize: '1.2rem'
+    }
+  }}
+  {...otherProps}
+/>
+```
+
+### CSS Override (Alternative Method)
+
+You can also override styles using CSS by importing custom styles after the component:
 
 ```jsx
 import { PricingTable } from 'mecha-pay';
